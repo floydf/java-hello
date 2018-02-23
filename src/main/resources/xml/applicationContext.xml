@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:oxm="http://www.springframework.org/schema/oxm"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+			   http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+			   http://www.springframework.org/schema/context  
+			   http://www.springframework.org/schema/context/spring-context-2.5.xsd  
+			   http://www.springframework.org/schema/oxm  
+			   http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+
+
+  <bean id="helloBean" class="org.simpleprogramming.hello.HelloMessage">
+  </bean>
+
+  <!--
+      Uncomment the stuff below to use as a data source if needed.
+  -->
+  <!--
+  <bean id="dataSource"
+	class="org.apache.commons.dbcp.BasicDataSource">
+    <property name="driverClassName" 
+	      value="oracle.jdbc.OracleDriver"/>
+    <property name="url" 
+	      value="jdbc:oracle:thin:@sandbox4.nsuok.edu:1521:sandbox4"/>
+    <property name="username"	value="apps"/>
+    <property name="password"	value="apps"/>
+  </bean>
+
+  <bean id="sqlMapClient"
+	class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+    <property name="configLocation"
+	      value="WEB-INF/ibatis-config.xml"/>
+  </bean>
+  -->
+</beans>

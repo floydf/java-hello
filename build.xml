@@ -1,0 +1,187 @@
+<?xml version="1.0" ?>
+
+<!--
+	Hello World sample program
+-->
+
+<project name="common" basedir="." default="compile">
+
+  <!-- ============================================================ -->
+  <!-- ===  Properties and definitions				=== -->
+  <!-- ============================================================ -->
+  <property name="projname"	value="hello"/>
+  <property name="ver"		value="0.1"/>
+  <property name="src.app.dir"	value="src/main/java"/>
+  <property name="src.test.dir"	value="src/test/java"/>
+  <property name="lib.dir"	value="lib"/>
+  <property name="build.dir"	value="build"/>
+  <property name="out.dir"	value="tmp"/>
+  <property name="tools.dir"	value="tools"/>
+  <property name="app.props"	value="src/main/resources/properties"/>
+  <property name="app.xml"	value="src/main/resources/xml"/>
+  <property name="dist.dir"	value="dist"/>
+  <property name="srcfile.zip"	value="${projname}-src-${ver}.zip"/>
+  <property name="srcfile.tar"	value="${projname}-src-${ver}.tar.gz"/>
+
+  <path id="master-classpath">
+    <pathelement path="${build.dir}"/>
+    <fileset dir="${lib.dir}"			includes="*.jar"/>
+  </path>
+
+  <!-- ============================================================ -->
+  <!-- ===  Compiling, building, cleaning			=== -->
+  <!-- ============================================================ -->
+  <target name="compile" depends="compile-app,compile-test"/>
+
+  <target name="compile-app" depends="copy-app-resources">
+    <mkdir dir="${build.dir}"/>
+    <javac destdir="${build.dir}" debug="true">       
+      <src path="${src.app.dir}"/>
+      <include name="**/*.java"/>
+      <include name="lib/reports.jar"/>
+      <exclude name="tags/**"/>
+      <exclude name="xml/**"/>
+      <classpath refid="master-classpath"/>
+      <!--
+      <compilerarg value="-Xlint:unchecked"/>
+      -->
+      <compilerarg value="-Xlint:deprecation"/>
+    </javac>
+  </target>
+
+  <target name="compile-test">
+    <mkdir dir="${build.dir}"/>
+    <javac destdir="${build.dir}" debug="true">       
+      <src path="${src.test.dir}"/>
+      <include name="**/*.java"/>
+      <exclude name="tags/**"/>
+      <exclude name="xml/**"/>
+      <classpath refid="master-classpath"/>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="clean">
+    <mkdir dir="tmp"/>
+    <mkdir dir="logs"/>
+    <mkdir dir="dist"/>
+    <delete includeEmptyDirs="true"> 
+      <fileset dir="${build.dir}"	includes="**/*"/>
+      <fileset dir="logs"		includes="*"/>
+      <fileset dir="tmp"		includes="*"/>
+      <fileset dir="dist"		includes="*"/>
+      <fileset dir="."			includes="*.png"/>
+    </delete>
+  </target>
+
+  <target name="copy-app-resources">
+    <copy todir="${build.dir}">
+      <fileset dir="${app.props}"	includes="*.properties"/>
+      <fileset dir="${app.xml}"		includes="*.xml"/>
+    </copy>
+  </target>
+
+  <!-- ============================================================ -->
+  <!-- ===  Spring task						=== -->
+  <!-- ============================================================ -->
+
+  <taskdef name="spring" 
+	   classname="org.simpleprogramming.common.SpringTask">
+    <classpath refid="master-classpath"/>
+  </taskdef>
+
+  <target name="hello" depends="compile">
+    <spring contextName="applicationContext.xml"
+	    entryName="helloBean">
+      <classpath refid="master-classpath"/>
+      <option helloMessage="Hello World"/>
+    </spring>
+  </target>
+
+  <!-- ============================================================ -->
+  <!-- ===  Junit support for unit testing			=== -->
+  <!-- ============================================================ -->
+  <target name="test" depends="compile">
+    <junit printsummary="on"
+	   haltonfailure="false"
+	   failureproperty="test.failed"
+	   dir="${build.dir}"
+	   fork="true"
+	   showoutput="true">
+      <classpath refid="master-classpath"/>
+      <sysproperty key="log4j.debug" value="false"/>
+      <formatter type="brief" usefile="false"/>
+
+      <test name="org.simpleprogramming.test.TestHelloMessage"/>
+
+      <!--
+
+      <test name="org.simpleprogramming.test.TestLoggedClass"/>
+
+      <batchtest>
+	<fileset dir="build/">
+	  <include name="**/Test*"/>
+	</fileset>
+      </batchtest>
+
+      -->
+    </junit>
+    <fail if="test.failed">
+      ********************************************************
+      ********************************************************
+      **** One or more tests failed! Check the output ... ****
+      ********************************************************
+      ********************************************************
+    </fail>
+  </target>
+
+  <!-- ============================================================ -->
+  <!-- ===  SRC Archive file creation				=== -->
+  <!-- ============================================================ -->
+  <target name="src" depends="clean">
+    <delete dir="tmp/${projname}-${ver}"/>
+    <mkdir dir="tmp/${projname}-${ver}"/>
+    <copy todir="tmp/${projname}-${ver}"
+	  preservelastmodified="true">
+      <fileset dir="."
+	       includes="build.xml,jots-*,ChangeLog,doc/**,lib/**,src/**"/>
+    </copy>
+    <echo message="Creating src zip file"/>
+    <zip destfile="${dist.dir}/${srcfile.zip}"
+	 basedir="tmp"
+	 includes="${projname}-${ver}/**"/>
+    <echo message="Creating src tgz file"/>
+    <tar destfile="${dist.dir}/${srcfile.tar}"
+	 basedir="tmp"
+	 includes="${projname}-${ver}/**"
+	 compression="gzip"/>
+
+    <delete dir="tmp/${projname}-${ver}"/>
+  </target>
+
+  <!-- ============================================================ -->
+  <!-- ===  JAR Archive file creation				=== -->
+  <!-- ============================================================ -->
+
+  <target name="jar" depends="clean, compile">
+    <jar destfile="dist/simpleprogramming-common-${ver}.jar"
+	 basedir="build">
+      <include name="**"/>
+    </jar>
+  </target>
+
+  <!-- ============================================================ -->
+  <!-- ===  Javadoc						=== -->
+  <!-- ============================================================ -->
+
+  <target name="javadoc">
+    <javadoc packagenames="org.simpleprogramming.common.*"
+	     destdir="doc/api"
+	     sourcepath="src/main/java"
+	     windowtitle="Common Library Routines"
+	     classpathref="master-classpath"
+	     use="true">
+    </javadoc>
+  </target>
+
+</project>
